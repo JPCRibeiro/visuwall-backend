@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: backend
+    name: visuwall-backend
 
   datasource:
     url: jdbc:postgresql://localhost:5432/visuwall
@@ -14,3 +14,21 @@ spring:
       ddl-auto: update
     open-in-view: false
     show-sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
+
+aws:
+  s3:
+    region: ${S3_REGION}
+    access-key: ${S3_ACCESS_KEY}
+    secret-key: ${S3_SECRET_KEY}
+    bucket-name: ${S3_BUCKET_NAME}
+    public-url: ${S3_PUBLIC_URL}
+
+logging:
+  level:
+    software.amazon.awssdk: DEBUG
+    software.amazon.awssdk.request: DEBUG
