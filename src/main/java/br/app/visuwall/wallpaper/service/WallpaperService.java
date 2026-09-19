@@ -85,10 +85,10 @@ public class WallpaperService {
 
             var thumbOs = new ByteArrayOutputStream();
             Thumbnails.of(image)
-                    .size(400, 300)
+                    .size(1024, 1024)
                     .imageType(BufferedImage.TYPE_INT_RGB)
                     .outputFormat("jpg")
-                    .outputQuality(0.9)
+                    .outputQuality(0.8)
                     .toOutputStream(thumbOs);
             thumbBytes = thumbOs.toByteArray();
         } catch (IOException e) {
