@@ -8,6 +8,7 @@ import br.app.visuwall.wallpaper.dto.WallpaperSummaryResponse;
 import br.app.visuwall.wallpaper.exception.DuplicateWallpaperException;
 import br.app.visuwall.wallpaper.exception.InvalidImageException;
 import br.app.visuwall.wallpaper.exception.ServerBusyException;
+import br.app.visuwall.wallpaper.exception.WallpaperNotFoundException;
 import br.app.visuwall.wallpaper.repository.WallpaperRepository;
 import lombok.RequiredArgsConstructor;
 import net.coobird.thumbnailator.Thumbnails;
@@ -116,6 +117,14 @@ public class WallpaperService {
         return wallpaperRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(WallpaperSummaryResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public WallpaperResponse getByShortId(String shortId) {
+        Wallpaper wallpaper = wallpaperRepository.findByShortId(shortId)
+                .orElseThrow(WallpaperNotFoundException::new);
+
+        return WallpaperResponse.from(wallpaper, "NomeDoAutor");
     }
 
     private static String extensionOf(String contentType) {

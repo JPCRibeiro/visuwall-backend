@@ -30,4 +30,9 @@ public class WallpaperController {
     public List<WallpaperSummaryResponse> getAll() {
         return wallpaperService.getAll();
     }
+
+    @GetMapping("/{shortId}")
+    public WallpaperResponse getByShortId(@PathVariable String shortId) {
+        return wallpaperService.getByShortId(shortId);
+    }
 }
