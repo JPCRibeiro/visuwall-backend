@@ -1,5 +1,8 @@
 package br.app.visuwall.shared;
 
+import br.app.visuwall.auth.exception.EmailAlreadyRegisteredException;
+import br.app.visuwall.auth.exception.InvalidCredentialsException;
+import br.app.visuwall.auth.exception.InvalidRefreshTokenException;
 import br.app.visuwall.wallpaper.exception.DuplicateWallpaperException;
 import br.app.visuwall.wallpaper.exception.InvalidImageException;
 import br.app.visuwall.wallpaper.exception.ServerBusyException;
@@ -25,12 +28,12 @@ public class GlobalExceptionHandler {
     ) {}
 
     @ExceptionHandler(WallpaperNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(WallpaperNotFoundException e) {
+    public ResponseEntity<ErrorResponse> handleWallpaperNotFound(WallpaperNotFoundException e) {
         return build(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(DuplicateWallpaperException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateWallpaperException e) {
+    public ResponseEntity<ErrorResponse> handleDuplicateWalpaper(DuplicateWallpaperException e) {
         return build(HttpStatus.CONFLICT, e.getMessage());
     }
 
@@ -40,8 +43,23 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ServerBusyException.class)
-    public ResponseEntity<ErrorResponse> handleBusy(ServerBusyException e) {
+    public ResponseEntity<ErrorResponse> handleServerBusy(ServerBusyException e) {
         return build(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+    }
+
+    @ExceptionHandler(EmailAlreadyRegisteredException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyRegistered(EmailAlreadyRegisteredException e) {
+        return build(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException e) {
+        return build(HttpStatus.UNAUTHORIZED, e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException e) {
+        return build(HttpStatus.UNAUTHORIZED, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -50,24 +68,26 @@ public class GlobalExceptionHandler {
                 .map(fe -> new ErrorField(fe.getField(), fe.getDefaultMessage()))
                 .toList();
 
-        ErrorResponse body = new ErrorResponse(
-                Instant.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Erro de validação",
-                fields
-        );
-
-        return ResponseEntity.badRequest().body(body);
+        return build(HttpStatus.BAD_REQUEST, "Erro de validação", fields);
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception e) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno");
+    }
+
+
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String message) {
+        return build(status, message, List.of());
+    }
+
+    private ResponseEntity<ErrorResponse> build(HttpStatus status, String message, List<ErrorField> fields) {
         ErrorResponse body = new ErrorResponse(
                 Instant.now(),
                 status.value(),
                 message,
-                List.of()
+                fields
         );
-
         return ResponseEntity.status(status).body(body);
     }
 }
