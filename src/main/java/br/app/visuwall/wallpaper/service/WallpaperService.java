@@ -1,6 +1,9 @@
 package br.app.visuwall.wallpaper.service;
 
 import br.app.visuwall.shared.config.storage.S3Service;
+import br.app.visuwall.user.domain.User;
+import br.app.visuwall.user.exception.UserNotFoundException;
+import br.app.visuwall.user.service.UserService;
 import br.app.visuwall.wallpaper.domain.Category;
 import br.app.visuwall.wallpaper.domain.Wallpaper;
 import br.app.visuwall.wallpaper.dto.WallpaperResponse;
@@ -39,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 public class WallpaperService {
     private final WallpaperRepository wallpaperRepository;
     private final S3Service s3Service;
+    private final UserService userService;
 
     private final Semaphore resizeSemaphore = new Semaphore(2);
     private static final char[] ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
@@ -123,8 +127,9 @@ public class WallpaperService {
     public WallpaperResponse getByShortId(String shortId) {
         Wallpaper wallpaper = wallpaperRepository.findByShortId(shortId)
                 .orElseThrow(WallpaperNotFoundException::new);
-
-        return WallpaperResponse.from(wallpaper, "NomeDoAutor");
+        User author = userService.findById(wallpaper.getUserId())
+                .orElseThrow(UserNotFoundException::new);
+        return WallpaperResponse.from(wallpaper, author.getUsername());
     }
 
     private static String extensionOf(String contentType) {
