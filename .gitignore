@@ -21,7 +21,6 @@ src/main/resources/keys/
 docker-compose.override.yml
 *.log
 
-
 ### IntelliJ IDEA ###
 .idea
 *.iws
