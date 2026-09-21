@@ -3,10 +3,12 @@ package br.app.visuwall.shared;
 import br.app.visuwall.auth.exception.EmailAlreadyRegisteredException;
 import br.app.visuwall.auth.exception.InvalidCredentialsException;
 import br.app.visuwall.auth.exception.InvalidRefreshTokenException;
+import br.app.visuwall.user.exception.UserNotFoundException;
 import br.app.visuwall.wallpaper.exception.DuplicateWallpaperException;
 import br.app.visuwall.wallpaper.exception.InvalidImageException;
 import br.app.visuwall.wallpaper.exception.ServerBusyException;
 import br.app.visuwall.wallpaper.exception.WallpaperNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     public record ErrorField(String field, String message) {}
@@ -47,6 +50,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<String> handleUserNotFound(UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
     @ExceptionHandler(EmailAlreadyRegisteredException.class)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyRegistered(EmailAlreadyRegisteredException e) {
         return build(HttpStatus.CONFLICT, e.getMessage());
@@ -73,6 +81,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception e) {
+        log.error("Erro não tratado", e);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Erro interno");
     }
 
