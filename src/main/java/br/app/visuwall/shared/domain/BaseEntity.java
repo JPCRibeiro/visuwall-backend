@@ -3,6 +3,7 @@ package br.app.visuwall.shared.domain;
 import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Persistable;
 
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Getter
 public abstract class BaseEntity implements Persistable<UUID> {
     @Id
+    @NonNull
     protected UUID id;
 
     @Transient
